@@ -10,35 +10,27 @@ Two attacker variants
    combined_distance = interval_hamming + alpha*(n-1)*|chrom(a)-chrom(b)|
 
 2. Mechanism-aware (run_experiment_aware):
-   The attacker knows which mechanism was used and exploits it:
+   The attacker knows which mechanism was used and exploits it.
 
-   For M-Scale output:
-     The attacker knows M-Scale replacements always land on C-major notes.
-     Expected chromatic%(output) = original_chromatic% * p.
-     Distance uses the PREDICTION ERROR on this fingerprint:
-       aware_dist_scale(output, candidate) =
-           interval_hamming(output, candidate)
-           + alpha*(n-1)*|chrom(output) - chrom(candidate)*p|
+   Case A — M-Scale output (paper eq. after Prop. 1):
+     M-Scale replacements always land on C-major notes, so chi(output) = 0
+     almost surely. The attacker therefore uses chi(m') = 0 in the combined
+     distance, which reduces the chromatic term to alpha*(n-1)*chi(candidate):
+       d_scale(m', c) = d_IH(m', c) + alpha*(n-1)*chi(c)
 
-   For M-Random output:
-     The attacker knows M-Random replacements land on ~42% chromatic notes.
-     M-Random destroys key info -> chromatic term adds no signal.
-     Distance uses ONLY interval-Hamming:
-       aware_dist_random(output, candidate) = interval_hamming(output, candidate)
-
-   The gap between the two attacker accuracies shows how much M-Scale's
-   structure contributes to leakage beyond what M-Random leaks.
+   Case B — M-Random output (paper eq. after Prop. 1):
+     Proposition 1 gives E[chi(M-Random(m))] = 535/1716 + (36/143)*chi(c).
+     The attacker predicts this expected output chromatic fraction for each
+     candidate c and compares it to the observed chi(m'):
+       d_random(m', c) = d_IH(m', c)
+                         + alpha*(n-1)*|chi(m') - (535/1716 + (36/143)*chi(c))|
 
 Accuracy metrics
 ----------------
-SUCCESS @1 : true original is the nearest neighbour (rank 0)
-SUCCESS @5 : true original is in the top-5 nearest neighbours (rank < 5)
+Acc@1 : true original is the nearest neighbour (rank 0)
+Acc@5 : true original is in the top-5 nearest neighbours (rank < 5)
 
-We run `num_trials` independent repetitions and average over all
-(trial, melody) pairs to get stable accuracy estimates.
-
-95 % confidence intervals are computed via the normal approximation
-(standard error of the mean), which is fine for n >= 30 * 200 = 6000.
+30 independent trials, 95% Wilson score confidence intervals.
 """
 
 from __future__ import annotations
@@ -48,89 +40,95 @@ from math import exp
 import numpy as np
 
 from .mechanisms import m_random, m_scale
-from .metrics import chromatic_fraction, combined_distance, interval_hamming
+from .metrics import chromatic_fraction, combined_distance, interval_hamming, ALPHA
+
+# Proposition 1 constants (E[chi(M-Random)] = A + B*f at eps=ln7)
+_PROP1_A: float = 535 / 1716   # ≈ 0.3118
+_PROP1_B: float = 36 / 143     # ≈ 0.2517
 
 
 def _keep_prob(epsilon: float, k: int = 7) -> float:
-    """Return the retention probability p = e^eps / (e^eps + k - 1).
-    Standard k-RR formula, valid with the corrected mechanism that never
-    retains out-of-alphabet notes.
-    """
+    """Return the retention probability p = e^eps / (e^eps + k - 1)."""
     e_eps = exp(epsilon)
     return e_eps / (e_eps + k - 1)
 
 
+def _wilson_ci(successes: int, n: int, z: float = 1.96) -> tuple[float, float]:
+    """
+    Wilson score confidence interval for a proportion.
+    Returns (lower, upper) bounds.
+    """
+    if n == 0:
+        return 0.0, 0.0
+    p_hat = successes / n
+    denom = 1 + z * z / n
+    centre = (p_hat + z * z / (2 * n)) / denom
+    margin = z * ((p_hat * (1 - p_hat) / n + z * z / (4 * n * n)) ** 0.5) / denom
+    return max(0.0, centre - margin), min(1.0, centre + margin)
+
+
 # ---------------------------------------------------------------------------
-# Core attack
+# Core attack — mechanism-agnostic
 # ---------------------------------------------------------------------------
 
 def retrieval_rank(
     perturbed: list[int],
     database: list[list[int]],
     true_idx: int,
-    alpha: float = 2.53,
+    alpha: float = ALPHA,
 ) -> int:
     """
     Return the 0-based rank of the true original in the distance-sorted list.
-
-    Rank 0  -> true original is the nearest neighbour (perfect attack).
-    Rank k  -> k melodies are closer than the true original.
-
-    Distance metric: combined_distance (interval-Hamming + chromatic term).
-
-    Parameters
-    ----------
-    perturbed : perturbed melody
-    database  : list of all original melodies
-    true_idx  : index into database of the true original
-    alpha     : weight for the chromatic-fraction term (default 2.53)
-
-    Returns
-    -------
-    integer rank (0 = success @1)
+    Uses combined_distance (interval-Hamming + alpha*(n-1)*|chi(a)-chi(b)|).
+    Rank 0 = nearest neighbour = perfect re-identification.
     """
     distances = [
         (i, combined_distance(perturbed, orig, alpha=alpha))
         for i, orig in enumerate(database)
     ]
     distances.sort(key=lambda x: x[1])
-    ranked_indices = [idx for idx, _ in distances]
-    return ranked_indices.index(true_idx)
+    return [idx for idx, _ in distances].index(true_idx)
 
 
 # ---------------------------------------------------------------------------
-# Mechanism-aware distance functions
+# Mechanism-aware distance functions (paper Section 3.5)
 # ---------------------------------------------------------------------------
 
 def _aware_dist_scale(
     perturbed: list[int],
     candidate: list[int],
-    p: float,
     alpha: float,
 ) -> float:
     """
-    Mechanism-aware distance for M-Scale output.
+    Case A: mechanism-aware distance for M-Scale output.
 
-    Exploits the fact that M-Scale replacements always land on C-major notes.
-    The expected chromatic fraction of the output is:
-        E[chrom(output)] = chrom(original) * p
-
-    So the attacker predicts: if `candidate` is the true original, the output
-    should have chromatic fraction ~ chrom(candidate) * p.
-
-    Distance = interval_hamming(perturbed, candidate)
-               + alpha * (n-1) * |chrom(perturbed) - chrom(candidate)*p|
-
-    Parameters
-    ----------
-    perturbed : M-Scale perturbed melody
-    candidate : candidate original from the database
-    p         : keep probability for the current epsilon
-    alpha     : weighting coefficient
+    Since chi(M-Scale output) = 0 almost surely, substitute chi(m') = 0:
+      d_scale(m', c) = d_IH(m', c) + alpha*(n-1)*chi(c)
     """
     iv_dist = interval_hamming(perturbed, candidate)
-    predicted_chrom = chromatic_fraction(candidate) * p
-    chrom_err = abs(chromatic_fraction(perturbed) - predicted_chrom)
+    n = min(len(perturbed), len(candidate))
+    return iv_dist + alpha * (n - 1) * chromatic_fraction(candidate)
+
+
+def _aware_dist_random(
+    perturbed: list[int],
+    candidate: list[int],
+    alpha: float,
+) -> float:
+    """
+    Case B: mechanism-aware distance for M-Random output.
+
+    Uses Proposition 1 to predict E[chi(output)] for each candidate:
+      predicted = 535/1716 + (36/143)*chi(candidate)
+      d_random(m', c) = d_IH(m', c) + alpha*(n-1)*|chi(m') - predicted|
+
+    In practice the chromatic term adds limited signal for M-RANDOM outputs
+    because the random alphabet makes the output chromatic fraction noisy.
+    The dominant term is interval-Hamming.
+    """
+    iv_dist   = interval_hamming(perturbed, candidate)
+    predicted = _PROP1_A + _PROP1_B * chromatic_fraction(candidate)
+    chrom_err = abs(chromatic_fraction(perturbed) - predicted)
     n = min(len(perturbed), len(candidate))
     return iv_dist + alpha * (n - 1) * chrom_err
 
@@ -139,25 +137,11 @@ def retrieval_rank_aware_scale(
     perturbed: list[int],
     database: list[list[int]],
     true_idx: int,
-    p: float,
-    alpha: float = 2.53,
+    alpha: float = ALPHA,
 ) -> int:
-    """
-    Mechanism-aware rank for M-Scale output.
-
-    Uses _aware_dist_scale which predicts the expected chromatic fingerprint
-    for each candidate assuming M-Scale was applied.
-
-    Parameters
-    ----------
-    perturbed : M-Scale perturbed melody
-    database  : list of all original melodies
-    true_idx  : index of the true original in database
-    p         : keep probability = e^eps / (e^eps + 6)
-    alpha     : weight for chromatic prediction error
-    """
+    """Mechanism-aware rank for M-Scale output (Case A)."""
     distances = [
-        (i, _aware_dist_scale(perturbed, orig, p=p, alpha=alpha))
+        (i, _aware_dist_scale(perturbed, orig, alpha=alpha))
         for i, orig in enumerate(database)
     ]
     distances.sort(key=lambda x: x[1])
@@ -168,22 +152,11 @@ def retrieval_rank_aware_random(
     perturbed: list[int],
     database: list[list[int]],
     true_idx: int,
+    alpha: float = ALPHA,
 ) -> int:
-    """
-    Mechanism-aware rank for M-Random output.
-
-    M-Random destroys key-signature information (replacements land on any of
-    12 notes, ~42% chromatic regardless of original key). The chromatic term
-    therefore adds no signal -- use interval-Hamming only.
-
-    Parameters
-    ----------
-    perturbed : M-Random perturbed melody
-    database  : list of all original melodies
-    true_idx  : index of the true original in database
-    """
+    """Mechanism-aware rank for M-Random output (Case B)."""
     distances = [
-        (i, interval_hamming(perturbed, orig))
+        (i, _aware_dist_random(perturbed, orig, alpha=alpha))
         for i, orig in enumerate(database)
     ]
     distances.sort(key=lambda x: x[1])
@@ -191,116 +164,74 @@ def retrieval_rank_aware_random(
 
 
 # ---------------------------------------------------------------------------
-# Experiment runner
+# Experiment runners
 # ---------------------------------------------------------------------------
 
 def run_experiment(
     dataset: list[list[int]],
     epsilon: float,
     num_trials: int = 30,
-    alpha: float = 2.53,
+    alpha: float = ALPHA,
 ) -> dict:
     """
-    Run the full re-identification experiment for one epsilon value.
+    Mechanism-agnostic attacker: uses combined_distance for both mechanisms.
 
-    For each (trial, melody) pair we:
-      - Perturb with M-Random  -> record rank of true original
-      - Perturb with M-Scale   -> record rank of true original
+    Seeds: seed_random = trial*10_000 + melody_idx
+           seed_scale  = trial*10_000 + melody_idx + 5_000
 
-    Uses deterministic seeds:
-      seed_random = trial * 10_000 + melody_idx
-      seed_scale  = trial * 10_000 + melody_idx + 5_000
-
-    Parameters
-    ----------
-    dataset    : list of original melodies (MIDI note lists)
-    epsilon    : per-note privacy parameter
-    num_trials : number of independent repetitions
-    alpha      : weight for chromatic-fraction term in combined_distance
-
-    Returns
-    -------
-    dict with keys:
-      epsilon, acc1_random, acc1_scale, acc5_random, acc5_scale,
-      ci1_random, ci1_scale, ci5_random, ci5_scale, raw
+    Returns dict with acc1/acc5 for M-Random and M-Scale, plus Wilson CIs.
     """
     ranks_random: list[int] = []
     ranks_scale: list[int] = []
-
-    n = len(dataset)
 
     for trial in range(num_trials):
         for melody_idx, melody in enumerate(dataset):
             seed_r = trial * 10_000 + melody_idx
             seed_s = trial * 10_000 + melody_idx + 5_000
 
-            # M-Random
             perturbed_r = m_random(melody, epsilon, seed=seed_r)
             ranks_random.append(retrieval_rank(perturbed_r, dataset, melody_idx, alpha=alpha))
 
-            # M-Scale
             perturbed_s = m_scale(melody, epsilon, seed=seed_s)
             ranks_scale.append(retrieval_rank(perturbed_s, dataset, melody_idx, alpha=alpha))
 
-    # Accuracy @1 and @5
-    hits1_random = np.array([r == 0 for r in ranks_random], dtype=float)
-    hits1_scale  = np.array([r == 0 for r in ranks_scale],  dtype=float)
-    hits5_random = np.array([r < 5  for r in ranks_random], dtype=float)
-    hits5_scale  = np.array([r < 5  for r in ranks_scale],  dtype=float)
+    n = len(ranks_random)
+    hits1_r = sum(1 for r in ranks_random if r == 0)
+    hits1_s = sum(1 for r in ranks_scale  if r == 0)
+    hits5_r = sum(1 for r in ranks_random if r < 5)
+    hits5_s = sum(1 for r in ranks_scale  if r < 5)
 
-    def _ci(arr: np.ndarray) -> float:
-        """95 % CI half-width via normal approximation."""
-        return 1.96 * np.std(arr) / np.sqrt(len(arr))
+    ci1_r = _wilson_ci(hits1_r, n)
+    ci1_s = _wilson_ci(hits1_s, n)
+    ci5_r = _wilson_ci(hits5_r, n)
+    ci5_s = _wilson_ci(hits5_s, n)
 
     return {
         "epsilon":     epsilon,
-        "acc1_random": float(np.mean(hits1_random)),
-        "acc1_scale":  float(np.mean(hits1_scale)),
-        "acc5_random": float(np.mean(hits5_random)),
-        "acc5_scale":  float(np.mean(hits5_scale)),
-        "ci1_random":  float(_ci(hits1_random)),
-        "ci1_scale":   float(_ci(hits1_scale)),
-        "ci5_random":  float(_ci(hits5_random)),
-        "ci5_scale":   float(_ci(hits5_scale)),
-        "raw": {
-            "ranks_random": ranks_random,
-            "ranks_scale":  ranks_scale,
-        },
+        "acc1_random": hits1_r / n,
+        "acc1_scale":  hits1_s / n,
+        "acc5_random": hits5_r / n,
+        "acc5_scale":  hits5_s / n,
+        "ci1_random":  ci1_r,
+        "ci1_scale":   ci1_s,
+        "ci5_random":  ci5_r,
+        "ci5_scale":   ci5_s,
+        "raw": {"ranks_random": ranks_random, "ranks_scale": ranks_scale},
     }
 
-
-# ---------------------------------------------------------------------------
-# Mechanism-aware experiment runner
-# ---------------------------------------------------------------------------
 
 def run_experiment_aware(
     dataset: list[list[int]],
     epsilon: float,
     num_trials: int = 30,
-    alpha: float = 2.53,
+    alpha: float = ALPHA,
 ) -> dict:
     """
-    Run the re-identification experiment with MECHANISM-AWARE attackers.
+    Mechanism-aware attacker: uses Case A for M-Scale, Case B for M-Random.
 
-    M-Scale attacker: uses predicted chromatic fingerprint chrom(candidate)*p
-    M-Random attacker: uses interval-Hamming only (chromatic term is noise)
-
-    This models an attacker who knows which mechanism was deployed and
-    exploits that knowledge optimally.
-
-    Parameters
-    ----------
-    dataset    : list of original melodies (MIDI note lists)
-    epsilon    : per-note privacy parameter
-    num_trials : number of independent repetitions
-    alpha      : weight for chromatic prediction error (M-Scale attacker only)
-
-    Returns
-    -------
-    dict with same keys as run_experiment(), prefixed with "aware_"
+    Returns dict with aware_acc1/aware_acc5 for M-Random and M-Scale,
+    plus Wilson CIs.
     """
-    p = _keep_prob(epsilon)
-
     ranks_random: list[int] = []
     ranks_scale: list[int] = []
 
@@ -309,40 +240,38 @@ def run_experiment_aware(
             seed_r = trial * 10_000 + melody_idx
             seed_s = trial * 10_000 + melody_idx + 5_000
 
-            # M-Random with mechanism-aware attacker (interval-Hamming only)
             perturbed_r = m_random(melody, epsilon, seed=seed_r)
             ranks_random.append(
-                retrieval_rank_aware_random(perturbed_r, dataset, melody_idx)
+                retrieval_rank_aware_random(perturbed_r, dataset, melody_idx, alpha=alpha)
             )
 
-            # M-Scale with mechanism-aware attacker (chromatic prediction)
             perturbed_s = m_scale(melody, epsilon, seed=seed_s)
             ranks_scale.append(
-                retrieval_rank_aware_scale(perturbed_s, dataset, melody_idx, p=p, alpha=alpha)
+                retrieval_rank_aware_scale(perturbed_s, dataset, melody_idx, alpha=alpha)
             )
 
-    hits1_random = np.array([r == 0 for r in ranks_random], dtype=float)
-    hits1_scale  = np.array([r == 0 for r in ranks_scale],  dtype=float)
-    hits5_random = np.array([r < 5  for r in ranks_random], dtype=float)
-    hits5_scale  = np.array([r < 5  for r in ranks_scale],  dtype=float)
+    n = len(ranks_random)
+    hits1_r = sum(1 for r in ranks_random if r == 0)
+    hits1_s = sum(1 for r in ranks_scale  if r == 0)
+    hits5_r = sum(1 for r in ranks_random if r < 5)
+    hits5_s = sum(1 for r in ranks_scale  if r < 5)
 
-    def _ci(arr: np.ndarray) -> float:
-        return 1.96 * np.std(arr) / np.sqrt(len(arr))
+    ci1_r = _wilson_ci(hits1_r, n)
+    ci1_s = _wilson_ci(hits1_s, n)
+    ci5_r = _wilson_ci(hits5_r, n)
+    ci5_s = _wilson_ci(hits5_s, n)
 
     return {
         "epsilon":           epsilon,
-        "aware_acc1_random": float(np.mean(hits1_random)),
-        "aware_acc1_scale":  float(np.mean(hits1_scale)),
-        "aware_acc5_random": float(np.mean(hits5_random)),
-        "aware_acc5_scale":  float(np.mean(hits5_scale)),
-        "aware_ci1_random":  float(_ci(hits1_random)),
-        "aware_ci1_scale":   float(_ci(hits1_scale)),
-        "aware_ci5_random":  float(_ci(hits5_random)),
-        "aware_ci5_scale":   float(_ci(hits5_scale)),
-        "raw": {
-            "ranks_random": ranks_random,
-            "ranks_scale":  ranks_scale,
-        },
+        "aware_acc1_random": hits1_r / n,
+        "aware_acc1_scale":  hits1_s / n,
+        "aware_acc5_random": hits5_r / n,
+        "aware_acc5_scale":  hits5_s / n,
+        "aware_ci1_random":  ci1_r,
+        "aware_ci1_scale":   ci1_s,
+        "aware_ci5_random":  ci5_r,
+        "aware_ci5_scale":   ci5_s,
+        "raw": {"ranks_random": ranks_random, "ranks_scale": ranks_scale},
     }
 
 
