@@ -4,3 +4,5 @@
 *.log
 .DS_Store
 output/
+experiments_extended/data/meertens_raw/
+experiments_extended/data/SymbTr-master/
