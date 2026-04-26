@@ -1,7 +1,16 @@
 # ldp-melody-reidentification
 
-Code for the paper:
+Code and supplementary material for the paper:
 **Equal ε, Unequal Exposure: Re-identification Disparities in Structure-Aware LDP for Music**
+
+The `paper/` directory contains the supplementary material (`Supplementary_Material.pdf`),
+which includes full proofs of all theoretical claims:
+- **Proof of ε-LDP** for both M-Scale and M-Random (Appendix A.2)
+- **Proof of Proposition 1**: derivation of E[χ(m′)] for M-Random (Appendix A.4)
+- **Derivation of retention probability p** from the randomised-response mechanism (Appendix A.2)
+- **Variance matching derivation** for distance weight α ≈ 1.66 (Appendix A.5)
+- Full experimental results table with 95% Wilson CIs for all three attacker types (Appendix A.6)
+- Bayesian optimal attacker description and results on Europa 200 (Appendix A.8)
 
 ---
 
