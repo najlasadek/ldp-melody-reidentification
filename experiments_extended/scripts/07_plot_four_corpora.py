@@ -15,6 +15,7 @@ Colors:
 from __future__ import annotations
 
 import json
+import sys
 from math import exp, log
 from pathlib import Path
 
@@ -26,6 +27,13 @@ import numpy as np
 BASE_DIR        = Path(__file__).parent.parent
 RESULTS_DIR     = BASE_DIR / "results"
 ADAPTIVE_DIR    = BASE_DIR.parent / "adaptive_aware" / "results"
+
+# --normalised: plot the length-normalised results (results_normalised/,
+# written by 17_run_normalised_sweeps.py) instead of the original results.
+NORMALISED = "--normalised" in sys.argv
+if NORMALISED:
+    RESULTS_DIR = BASE_DIR / "results_normalised"
+    ADAPTIVE_DIR = RESULTS_DIR
 FIG_DIR         = BASE_DIR / "figures"
 FIG_DIR.mkdir(exist_ok=True)
 PAPER_FIG_DIR   = BASE_DIR.parent.parent / "ISMIR-extended-red" / "figures"
@@ -179,14 +187,15 @@ def plot():
     )
 
     fig.suptitle(
-        r"M-Scale / M-Random re-identification ratio across four corpora",
+        r"M-Scale / M-Random re-identification ratio across four corpora"
+        + (" (length-normalised distance)" if NORMALISED else ""),
         fontsize=13,
         y=1.09,
     )
 
     plt.tight_layout()
 
-    stem = "fig_four_corpora_ratio"
+    stem = "fig_four_corpora_ratio" + ("_normalised" if NORMALISED else "")
     for d in [FIG_DIR, PAPER_FIG_DIR]:
         if d.exists():
             fig.savefig(d / f"{stem}.pdf", bbox_inches="tight")

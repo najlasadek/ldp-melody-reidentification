@@ -1,0 +1,243 @@
+{
+  "corpus": "meertens",
+  "N": 500,
+  "num_trials": 30,
+  "distance": "d / (n-1)",
+  "results": [
+    {
+      "epsilon": 1.0986122886681098,
+      "exp_epsilon": 3.0000000000000004,
+      "n_queries": 15000,
+      "agnostic_random": {
+        "hits": 111,
+        "acc1": 0.0074,
+        "ci1": [
+          0.0061489580947978765,
+          0.008903293589864004
+        ],
+        "distinct_predicted": 327,
+        "top_candidate_share": 0.0536
+      },
+      "agnostic_scale": {
+        "hits": 423,
+        "acc1": 0.0282,
+        "ci1": [
+          0.025669133280798045,
+          0.03097246709440186
+        ],
+        "distinct_predicted": 288,
+        "top_candidate_share": 0.04173333333333333
+      },
+      "aware_random": {
+        "hits": 134,
+        "acc1": 0.008933333333333333,
+        "ci1": [
+          0.007548213819681954,
+          0.010569919338961896
+        ],
+        "distinct_predicted": 492,
+        "top_candidate_share": 0.062
+      },
+      "aware_scale": {
+        "hits": 423,
+        "acc1": 0.0282,
+        "ci1": [
+          0.025669133280798045,
+          0.03097246709440186
+        ],
+        "distinct_predicted": 288,
+        "top_candidate_share": 0.04173333333333333
+      },
+      "agnostic_ratio": 3.810810810810811,
+      "aware_ratio": 3.156716417910448
+    },
+    {
+      "epsilon": 1.6094379124341003,
+      "exp_epsilon": 4.999999999999999,
+      "n_queries": 15000,
+      "agnostic_random": {
+        "hits": 277,
+        "acc1": 0.018466666666666666,
+        "ci1": [
+          0.01643215641405618,
+          0.020747761561084266
+        ],
+        "distinct_predicted": 376,
+        "top_candidate_share": 0.0448
+      },
+      "agnostic_scale": {
+        "hits": 1666,
+        "acc1": 0.11106666666666666,
+        "ci1": [
+          0.1061374252051355,
+          0.11619507395961173
+        ],
+        "distinct_predicted": 293,
+        "top_candidate_share": 0.0396
+      },
+      "aware_random": {
+        "hits": 496,
+        "acc1": 0.03306666666666667,
+        "ci1": [
+          0.030322523494125043,
+          0.0360499180811046
+        ],
+        "distinct_predicted": 493,
+        "top_candidate_share": 0.05393333333333333
+      },
+      "aware_scale": {
+        "hits": 1666,
+        "acc1": 0.11106666666666666,
+        "ci1": [
+          0.1061374252051355,
+          0.11619507395961173
+        ],
+        "distinct_predicted": 293,
+        "top_candidate_share": 0.0396
+      },
+      "agnostic_ratio": 6.014440433212997,
+      "aware_ratio": 3.3588709677419355
+    },
+    {
+      "epsilon": 1.9459101490553132,
+      "exp_epsilon": 6.999999999999999,
+      "n_queries": 15000,
+      "agnostic_random": {
+        "hits": 532,
+        "acc1": 0.03546666666666667,
+        "ci1": [
+          0.03262368113488695,
+          0.03854753144309708
+        ],
+        "distinct_predicted": 399,
+        "top_candidate_share": 0.0414
+      },
+      "agnostic_scale": {
+        "hits": 3314,
+        "acc1": 0.22093333333333334,
+        "ci1": [
+          0.21436585838652059,
+          0.22764371334876085
+        ],
+        "distinct_predicted": 328,
+        "top_candidate_share": 0.0382
+      },
+      "aware_random": {
+        "hits": 981,
+        "acc1": 0.0654,
+        "ci1": [
+          0.06155370790063559,
+          0.06946884301725732
+        ],
+        "distinct_predicted": 492,
+        "top_candidate_share": 0.0464
+      },
+      "aware_scale": {
+        "hits": 3314,
+        "acc1": 0.22093333333333334,
+        "ci1": [
+          0.21436585838652059,
+          0.22764371334876085
+        ],
+        "distinct_predicted": 328,
+        "top_candidate_share": 0.0382
+      },
+      "agnostic_ratio": 6.2293233082706765,
+      "aware_ratio": 3.3781855249745156
+    },
+    {
+      "epsilon": 2.0794415416798357,
+      "exp_epsilon": 7.999999999999998,
+      "n_queries": 15000,
+      "agnostic_random": {
+        "hits": 689,
+        "acc1": 0.04593333333333333,
+        "ci1": [
+          0.04269785865965215,
+          0.04940132745812185
+        ],
+        "distinct_predicted": 423,
+        "top_candidate_share": 0.03913333333333333
+      },
+      "agnostic_scale": {
+        "hits": 4062,
+        "acc1": 0.2708,
+        "ci1": [
+          0.26374790389212616,
+          0.27796946534482975
+        ],
+        "distinct_predicted": 332,
+        "top_candidate_share": 0.0362
+      },
+      "aware_random": {
+        "hits": 1243,
+        "acc1": 0.08286666666666667,
+        "ci1": [
+          0.07856093390905389,
+          0.08738600597332932
+        ],
+        "distinct_predicted": 493,
+        "top_candidate_share": 0.04253333333333333
+      },
+      "aware_scale": {
+        "hits": 4062,
+        "acc1": 0.2708,
+        "ci1": [
+          0.26374790389212616,
+          0.27796946534482975
+        ],
+        "distinct_predicted": 332,
+        "top_candidate_share": 0.0362
+      },
+      "agnostic_ratio": 5.895500725689405,
+      "aware_ratio": 3.267900241351569
+    },
+    {
+      "epsilon": 2.772588722239781,
+      "exp_epsilon": 15.999999999999998,
+      "n_queries": 15000,
+      "agnostic_random": {
+        "hits": 1904,
+        "acc1": 0.12693333333333334,
+        "ci1": [
+          0.12170119746939514,
+          0.13235650999133944
+        ],
+        "distinct_predicted": 484,
+        "top_candidate_share": 0.031066666666666666
+      },
+      "agnostic_scale": {
+        "hits": 7725,
+        "acc1": 0.515,
+        "ci1": [
+          0.5069991175109267,
+          0.5229932012562881
+        ],
+        "distinct_predicted": 368,
+        "top_candidate_share": 0.027133333333333332
+      },
+      "aware_random": {
+        "hits": 3150,
+        "acc1": 0.21,
+        "ci1": [
+          0.2035563741450833,
+          0.2165921296887615
+        ],
+        "distinct_predicted": 493,
+        "top_candidate_share": 0.0312
+      },
+      "aware_scale": {
+        "hits": 7725,
+        "acc1": 0.515,
+        "ci1": [
+          0.5069991175109267,
+          0.5229932012562881
+        ],
+        "distinct_predicted": 368,
+        "top_candidate_share": 0.027133333333333332
+      },
+      "agnostic_ratio": 4.057247899159663,
+      "aware_ratio": 2.4523809523809526
+    }
+  ]
+}

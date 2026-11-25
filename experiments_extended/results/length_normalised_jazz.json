@@ -1,0 +1,243 @@
+{
+  "corpus": "jazz",
+  "N": 200,
+  "num_trials": 30,
+  "distance": "d / (n-1)",
+  "results": [
+    {
+      "epsilon": 1.0986122886681098,
+      "exp_epsilon": 3.0000000000000004,
+      "n_queries": 6000,
+      "agnostic_random": {
+        "hits": 131,
+        "acc1": 0.021833333333333333,
+        "ci1": [
+          0.018430005283939864,
+          0.02584857794850251
+        ],
+        "distinct_predicted": 199,
+        "top_candidate_share": 0.018333333333333333
+      },
+      "agnostic_scale": {
+        "hits": 126,
+        "acc1": 0.021,
+        "ci1": [
+          0.01766660731686319,
+          0.02494637567722513
+        ],
+        "distinct_predicted": 17,
+        "top_candidate_share": 0.2678333333333333
+      },
+      "aware_random": {
+        "hits": 165,
+        "acc1": 0.0275,
+        "ci1": [
+          0.023654612546087035,
+          0.03195005230716292
+        ],
+        "distinct_predicted": 200,
+        "top_candidate_share": 0.0645
+      },
+      "aware_scale": {
+        "hits": 126,
+        "acc1": 0.021,
+        "ci1": [
+          0.01766660731686319,
+          0.02494637567722513
+        ],
+        "distinct_predicted": 17,
+        "top_candidate_share": 0.2678333333333333
+      },
+      "agnostic_ratio": 0.9618320610687023,
+      "aware_ratio": 0.7636363636363637
+    },
+    {
+      "epsilon": 1.6094379124341003,
+      "exp_epsilon": 4.999999999999999,
+      "n_queries": 6000,
+      "agnostic_random": {
+        "hits": 294,
+        "acc1": 0.049,
+        "ci1": [
+          0.04382048885398115,
+          0.054756662148803474
+        ],
+        "distinct_predicted": 199,
+        "top_candidate_share": 0.017
+      },
+      "agnostic_scale": {
+        "hits": 251,
+        "acc1": 0.041833333333333333,
+        "ci1": [
+          0.03705367212591251,
+          0.047199316827027216
+        ],
+        "distinct_predicted": 23,
+        "top_candidate_share": 0.26466666666666666
+      },
+      "aware_random": {
+        "hits": 432,
+        "acc1": 0.072,
+        "ci1": [
+          0.0657295724951035,
+          0.07881814508625307
+        ],
+        "distinct_predicted": 200,
+        "top_candidate_share": 0.059833333333333336
+      },
+      "aware_scale": {
+        "hits": 251,
+        "acc1": 0.041833333333333333,
+        "ci1": [
+          0.03705367212591251,
+          0.047199316827027216
+        ],
+        "distinct_predicted": 23,
+        "top_candidate_share": 0.26466666666666666
+      },
+      "agnostic_ratio": 0.8537414965986394,
+      "aware_ratio": 0.5810185185185185
+    },
+    {
+      "epsilon": 1.9459101490553132,
+      "exp_epsilon": 6.999999999999999,
+      "n_queries": 6000,
+      "agnostic_random": {
+        "hits": 506,
+        "acc1": 0.08433333333333333,
+        "ci1": [
+          0.07756500761277223,
+          0.09163359349622437
+        ],
+        "distinct_predicted": 200,
+        "top_candidate_share": 0.014333333333333333
+      },
+      "agnostic_scale": {
+        "hits": 366,
+        "acc1": 0.061,
+        "ci1": [
+          0.05522042927870866,
+          0.06734136515637436
+        ],
+        "distinct_predicted": 27,
+        "top_candidate_share": 0.2791666666666667
+      },
+      "aware_random": {
+        "hits": 782,
+        "acc1": 0.13033333333333333,
+        "ci1": [
+          0.12205038746426485,
+          0.13908934680187565
+        ],
+        "distinct_predicted": 200,
+        "top_candidate_share": 0.0595
+      },
+      "aware_scale": {
+        "hits": 366,
+        "acc1": 0.061,
+        "ci1": [
+          0.05522042927870866,
+          0.06734136515637436
+        ],
+        "distinct_predicted": 27,
+        "top_candidate_share": 0.2791666666666667
+      },
+      "agnostic_ratio": 0.7233201581027668,
+      "aware_ratio": 0.4680306905370844
+    },
+    {
+      "epsilon": 2.0794415416798357,
+      "exp_epsilon": 7.999999999999998,
+      "n_queries": 6000,
+      "agnostic_random": {
+        "hits": 607,
+        "acc1": 0.10116666666666667,
+        "ci1": [
+          0.0937897870340128,
+          0.10905393888973575
+        ],
+        "distinct_predicted": 200,
+        "top_candidate_share": 0.014166666666666666
+      },
+      "agnostic_scale": {
+        "hits": 425,
+        "acc1": 0.07083333333333333,
+        "ci1": [
+          0.06461269284053525,
+          0.07760318440712563
+        ],
+        "distinct_predicted": 29,
+        "top_candidate_share": 0.2715
+      },
+      "aware_random": {
+        "hits": 950,
+        "acc1": 0.15833333333333333,
+        "ci1": [
+          0.14931519714913605,
+          0.16778870512570077
+        ],
+        "distinct_predicted": 200,
+        "top_candidate_share": 0.0535
+      },
+      "aware_scale": {
+        "hits": 425,
+        "acc1": 0.07083333333333333,
+        "ci1": [
+          0.06461269284053525,
+          0.07760318440712563
+        ],
+        "distinct_predicted": 29,
+        "top_candidate_share": 0.2715
+      },
+      "agnostic_ratio": 0.700164744645799,
+      "aware_ratio": 0.4473684210526316
+    },
+    {
+      "epsilon": 2.772588722239781,
+      "exp_epsilon": 15.999999999999998,
+      "n_queries": 6000,
+      "agnostic_random": {
+        "hits": 1338,
+        "acc1": 0.223,
+        "ci1": [
+          0.21264632996684857,
+          0.23370815080426305
+        ],
+        "distinct_predicted": 200,
+        "top_candidate_share": 0.012333333333333333
+      },
+      "agnostic_scale": {
+        "hits": 707,
+        "acc1": 0.11783333333333333,
+        "ci1": [
+          0.10991869511517863,
+          0.12623703557565105
+        ],
+        "distinct_predicted": 41,
+        "top_candidate_share": 0.2633333333333333
+      },
+      "aware_random": {
+        "hits": 1954,
+        "acc1": 0.32566666666666666,
+        "ci1": [
+          0.31392367647418945,
+          0.3376327536621418
+        ],
+        "distinct_predicted": 200,
+        "top_candidate_share": 0.046
+      },
+      "aware_scale": {
+        "hits": 707,
+        "acc1": 0.11783333333333333,
+        "ci1": [
+          0.10991869511517863,
+          0.12623703557565105
+        ],
+        "distinct_predicted": 41,
+        "top_candidate_share": 0.2633333333333333
+      },
+      "agnostic_ratio": 0.5284005979073244,
+      "aware_ratio": 0.3618219037871034
+    }
+  ]
+}

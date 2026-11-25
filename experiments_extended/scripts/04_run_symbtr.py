@@ -12,12 +12,11 @@ Prerequisite: run 01_prepare_datasets.py first to create
 Results saved to: results/symbtr_eps_sweep.json
 
 Scientific context:
-    Turkish makam music rarely aligns with C-major. Most melodies will
-    have high chromatic fraction (chi ≈ 0.4–0.7 by the C-major definition).
-    M-Scale still strips chromatic notes → chi(output) = 0 holds identically.
-    Expected: the fingerprint is *stronger* because the gap between input
-    chromaticity and output chromaticity is larger than in Western corpora.
-    ISMIR 2026 is in Abu Dhabi — "Crossroads" theme makes this directly relevant.
+    Turkish makam music rarely aligns with C-major. The processed corpus has a
+    mean chromatic fraction of 21.5% (C-major definition), the second highest
+    of the four corpora. M-Scale still strips chromatic notes, so
+    chi(output) = 0 holds identically. In the paper, SymbTr gives the largest
+    M-Scale/M-Random ratio (47.7x at ln5, aware heuristic attacker).
 
 Run from experiments_extended/ directory:
     python scripts/04_run_symbtr.py

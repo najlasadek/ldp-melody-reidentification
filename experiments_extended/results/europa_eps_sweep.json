@@ -4,7 +4,7 @@
   "near_diatonic_N": 73,
   "chromatic_N": 127,
   "num_trials": 30,
-  "paper_check_passed": false,
+  "paper_check_passed": true,
   "epsilon_sweep": [
     {
       "epsilon": 0.4054651081081644,

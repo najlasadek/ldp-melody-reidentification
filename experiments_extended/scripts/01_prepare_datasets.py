@@ -87,7 +87,7 @@ def main():
 
     europa_path = data_dir / "europa_200.json"
     if not europa_path.exists():
-        print(f"ERROR: {europa_path} not found. Copy it from code/data/melodies_europa.json")
+        print(f"ERROR: {europa_path} not found. Copy it from ../data/melodies_europa.json")
         sys.exit(1)
 
     europa = load_dataset(europa_path)

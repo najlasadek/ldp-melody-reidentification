@@ -12,7 +12,7 @@ fractions f and overlays the theoretical predictions.
 
 Usage
 -----
-  cd code/
+  # from the repository root
   python figures/fig3_chromatic_fingerprint.py
 """
 import matplotlib.pyplot as plt
@@ -102,9 +102,9 @@ ax.plot(f_pts, sim_mscale, 's', color='steelblue', markersize=4,
         label='M-Scale simulation')
 
 ax.set_xlabel(r'Input chromatic fraction $f = \chi(\mathbf{m})$')
-ax.set_ylabel(r'$\mathbb{E}[\chi(\tilde{\mathbf{m}})]$')
+ax.set_ylabel(r'$\mathbb{E}[\chi(\mathbf{m}^{\prime})]$')
 ax.set_title(
-    r'Key-signature fingerprint: theory vs.\ simulation' + '\n'
+    'Key-signature fingerprint: theory vs. simulation' + '\n'
     r'($\varepsilon = \ln 7$, 8000 trials per point)'
 )
 ax.legend(fontsize=8)

@@ -1,0 +1,41 @@
+{
+  "dataset": "synthetic key-balanced",
+  "N": 200,
+  "num_trials": 30,
+  "distance": "length-normalised: d / (n-1)",
+  "results": [
+    {
+      "exp_epsilon": 3,
+      "ag_r": 92,
+      "ag_s": 187,
+      "aw_r": 108,
+      "aw_s": 187,
+      "ad_r": 0,
+      "n": 6000,
+      "agnostic_ratio": 2.032608695652174,
+      "aware_ratio": 1.7314814814814814
+    },
+    {
+      "exp_epsilon": 7,
+      "ag_r": 246,
+      "ag_s": 409,
+      "aw_r": 300,
+      "aw_s": 409,
+      "ad_r": 0,
+      "n": 6000,
+      "agnostic_ratio": 1.6626016260162602,
+      "aware_ratio": 1.3633333333333333
+    },
+    {
+      "exp_epsilon": 12,
+      "ag_r": 395,
+      "ag_s": 490,
+      "aw_r": 473,
+      "aw_s": 490,
+      "ad_r": 0,
+      "n": 6000,
+      "agnostic_ratio": 1.240506329113924,
+      "aware_ratio": 1.0359408033826638
+    }
+  ]
+}

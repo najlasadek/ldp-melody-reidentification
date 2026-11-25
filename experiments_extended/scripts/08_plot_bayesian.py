@@ -1,7 +1,7 @@
 """
 08_plot_bayesian.py
 ===================
-Plot Bayesian attacker comparison figure for ISMIR_extended.
+Plot the Bayesian attacker comparison figure (Europa 200).
 
 Generates:
   fig_bayesian_comparison.pdf  -- two-panel figure:
@@ -73,7 +73,7 @@ def main():
         labels = []
         for i, e in enumerate(exp_e):
             if i % stride == 0:
-                v = round(e)
+                v = f"{round(e, 1):g}"  # 1.5 -> "1.5", 3.0000000000000004 -> "3"
                 labels.append(rf"$\ln {v}$")
             else:
                 labels.append("")
@@ -125,7 +125,7 @@ def main():
         ax.set_ylim(bottom=-0.2)
 
     fig.suptitle(
-        r"Bayesian vs.\ Aware vs.\ Agnostic attacker: Europa 200",
+        "Bayesian vs. Aware vs. Agnostic attacker: Europa 200",
         fontsize=11, y=1.01,
     )
     plt.tight_layout()

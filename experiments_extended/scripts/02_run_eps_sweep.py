@@ -4,8 +4,12 @@
 Dense epsilon sweep on Europa 200 melodies.
 
 STEP 1 (mandatory): Reproduce paper values at {ln3, ln7, ln12}.
-  Expected: aware attacker ratio ~8.44x at ln7, agnostic ~3.32x.
-  If these don't match within ±0.5x, the script stops and prints a warning.
+  Expected (paper Table 4 and Section 4.2), at the 2-decimal precision reported:
+    ln3 : aware 3.50x, agnostic 0.64x, aware near-diatonic 2.75x
+    ln7 : aware 12.83x, agnostic 3.08x, aware near-diatonic 5.15x
+    ln12: aware 8.41x, agnostic 3.64x
+  All perturbations are seeded, so these values are reproduced exactly.
+  If any value differs, a warning is printed and the results are flagged.
 
 STEP 2: Run full 15-value epsilon grid from ln(1.5) to ln(25).
 
@@ -46,11 +50,15 @@ EPS_SWEEP = [
 ]
 
 NUM_TRIALS = 30
-TOLERANCE  = 5.0   # Allowed deviation from paper values
-# NOTE: At very low accuracy (0.1% = 6/6000 successes), sampling variance causes
-# large ratio fluctuations across runs. The paper values (8.44x, 3.32x, 7.10x)
-# were computed in one run; our values will differ by ±several x due to small counts.
-# We verify the ABSOLUTE accuracy values match (M-Scale~1.3%, M-Random~0.1%) not ratios.
+TOLERANCE  = 0.005  # Half of the 2-decimal precision at which the paper reports ratios
+
+# Expected ratios from the paper (Table 4 and Section 4.2), keyed by exp(epsilon).
+# Seeds are fixed (seed = trial*10_000 + melody_idx), so these reproduce exactly.
+PAPER_EXPECTED = {
+    3:  {"aware": 3.50,  "agnostic": 0.64, "near_diatonic_aware": 2.75},
+    7:  {"aware": 12.83, "agnostic": 3.08, "near_diatonic_aware": 5.15},
+    12: {"aware": 8.41,  "agnostic": 3.64},
+}
 
 
 # =============================================================================
@@ -215,9 +223,9 @@ def main():
     # =========================================================================
     print("\n" + "="*70)
     print("STEP 1: Reproducing paper values at {ln3, ln7, ln12}")
-    print("  Expected (aware, all melodies): ~8.44x at ln7")
-    print("  Expected (agnostic, all):       ~3.32x at ln7")
-    print("  Expected (aware, near-diat):    ~7.10x at ln12")
+    for k, exp_vals in PAPER_EXPECTED.items():
+        print(f"  Expected at ln{k}: " +
+              ", ".join(f"{name} {val:.2f}x" for name, val in exp_vals.items()))
     print("="*70)
 
     paper_results = run_sweep(dataset, PAPER_EPS, "Europa 200 (paper check)")
@@ -225,26 +233,19 @@ def main():
     # Verify paper values
     paper_ok = True
     for entry in paper_results:
-        eps = entry["epsilon"]
-        exp_eps = entry["exp_epsilon"]
-        aw_ratio = entry["aware_ratio"]
-        ag_ratio = entry["agnostic_ratio"]
-
-        if abs(exp_eps - 7) < 0.01:  # ln7
-            if abs(aw_ratio - 8.44) > TOLERANCE:
-                print(f"\n  WARNING: aware ratio at ln7 = {aw_ratio:.2f}x (expected ~8.44x ± {TOLERANCE})")
-                print(f"           Gap = {aw_ratio - 8.44:.2f}x")
-                paper_ok = False
-            if abs(ag_ratio - 3.32) > TOLERANCE:
-                print(f"\n  WARNING: agnostic ratio at ln7 = {ag_ratio:.2f}x (expected ~3.32x ± {TOLERANCE})")
-                paper_ok = False
-
-        if abs(exp_eps - 12) < 0.01:  # ln12
-            nd = entry.get("near_diatonic", {})
-            nd_aw_ratio = nd.get("aware_ratio", None)
-            if nd_aw_ratio is not None and abs(nd_aw_ratio - 7.10) > TOLERANCE:
-                print(f"\n  WARNING: near-diatonic aware ratio at ln12 = {nd_aw_ratio:.2f}x "
-                      f"(expected ~7.10x ± {TOLERANCE})")
+        k = round(entry["exp_epsilon"])
+        if k not in PAPER_EXPECTED:
+            continue
+        observed = {
+            "aware": entry["aware_ratio"],
+            "agnostic": entry["agnostic_ratio"],
+            "near_diatonic_aware": entry.get("near_diatonic", {}).get("aware_ratio"),
+        }
+        for name, expected in PAPER_EXPECTED[k].items():
+            obs = observed[name]
+            if obs is None or abs(obs - expected) > TOLERANCE:
+                obs_str = "missing" if obs is None else f"{obs:.4f}x"
+                print(f"\n  WARNING: {name} ratio at ln{k} = {obs_str} (expected {expected:.2f}x)")
                 paper_ok = False
 
     if paper_ok:

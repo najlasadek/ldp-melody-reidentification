@@ -14,6 +14,7 @@ M-Random curve colors here equal the ratio curve colors there.
 from __future__ import annotations
 
 import json
+import sys
 from math import exp, log
 from pathlib import Path
 
@@ -25,6 +26,13 @@ import numpy as np
 BASE_DIR      = Path(__file__).parent.parent
 RESULTS_DIR   = BASE_DIR / "results"
 ADAPTIVE_DIR  = BASE_DIR.parent / "adaptive_aware" / "results"
+
+# --normalised: plot the length-normalised results (results_normalised/,
+# written by 17_run_normalised_sweeps.py) instead of the original results.
+NORMALISED = "--normalised" in sys.argv
+if NORMALISED:
+    RESULTS_DIR = BASE_DIR / "results_normalised"
+    ADAPTIVE_DIR = RESULTS_DIR
 FIG_DIR       = BASE_DIR / "figures"
 FIG_DIR.mkdir(exist_ok=True)
 PAPER_FIG_DIR = BASE_DIR.parent.parent / "ISMIR-extended-red" / "figures"
@@ -195,7 +203,8 @@ def plot():
 
     fig.suptitle(
         r"Acc@1 re-identification accuracy across four corpora"
-        "\n"
+        + (" (length-normalised distance)" if NORMALISED else "")
+        + "\n"
         r"Solid: heuristic aware attacker (fixed $\varepsilon{=}\ln 7$, does not know $\varepsilon$). "
         r"Dashed: $\varepsilon$-adaptive aware attacker (knows $\varepsilon$). "
         r"Shaded bands: 95% Wilson CIs.",
@@ -205,7 +214,7 @@ def plot():
 
     plt.tight_layout()
 
-    stem = "fig_four_corpora_acc"
+    stem = "fig_four_corpora_acc" + ("_normalised" if NORMALISED else "")
     for d in [FIG_DIR, PAPER_FIG_DIR]:
         if d.exists():
             fig.savefig(d / f"{stem}.pdf", bbox_inches="tight")

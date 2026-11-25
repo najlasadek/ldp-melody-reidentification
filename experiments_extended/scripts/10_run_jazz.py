@@ -7,8 +7,10 @@ Jazz solos are truncated to 30 notes from the first notes of each transcription.
 Mean chromaticity ~38% — the highest of all corpora, driven by jazz's use of
 chromatic passing tones, blue notes, and non-C-major scales.
 
-Expected: the M-Scale/M-Random re-identification gap should be even larger
-than SymbTr (47.7x), because jazz is structurally even further from C-major.
+Result (see paper): the effect reverses on this corpus. Under the
+retrieval-based attackers the M-Scale/M-Random ratio is below 1 at every
+epsilon, because M-Scale maps almost every (chromatic) melody into the same
+C-major distribution.
 
 Results saved to: results/jazz_eps_sweep.json
 

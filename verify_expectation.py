@@ -14,7 +14,7 @@ This script:
 
 Usage
 -----
-  cd code/
+  # from the repository root
   python verify_expectation.py
 """
 from __future__ import annotations
@@ -80,7 +80,10 @@ print()
 all_ok = True
 
 for f in F_VALUES:
-    theoretical = PROP1_A + PROP1_B * f
+    # make_melody rounds to a whole number of chromatic notes, so compare against
+    # the formula at the melody's actual chromatic fraction, not the target f.
+    f_actual = round(f * N_NOTES) / N_NOTES
+    theoretical = PROP1_A + PROP1_B * f_actual
 
     mrand_chis  = []
     mscale_chis = []
@@ -99,22 +102,21 @@ for f in F_VALUES:
     emp_std  = float(np.std(mrand_chis))
     emp_ci   = 1.96 * emp_std / (N_TRIALS ** 0.5)
     diff     = emp_mean - theoretical
-    # Accept if within 95% CI OR within 0.7 percentage points
-    # (simulated melodies have rounding to nearest integer note count,
-    #  so exact f targets introduce <0.5pp systematic bias at mid-range f).
-    within   = abs(diff) <= emp_ci or abs(diff) <= 0.007
+    # Accept if within 3 standard errors (a 95% interval would flag ~1 in 3 runs of
+    # seven checks by chance alone).
+    within   = abs(diff) <= 3 * emp_std / (N_TRIALS ** 0.5)
 
     mscale_mean = float(np.mean(mscale_chis))
 
     status = "OK" if within else "FAIL"
     all_ok = all_ok and within
 
-    print(f"f = {f:.4f}  (target chi = {f:.4f})")
+    print(f"f = {f:.4f}  (actual chi of {N_NOTES}-note melody = {f_actual:.4f})")
     print(f"  Theory E[chi(M-RANDOM)] = {theoretical:.6f}  ({theoretical*100:.3f}%)")
     print(f"  Empirical mean          = {emp_mean:.6f}  ({emp_mean*100:.3f}%)")
     print(f"  95% CI                  = [{emp_mean-emp_ci:.6f}, {emp_mean+emp_ci:.6f}]")
     print(f"  Difference              = {diff:+.6f}  ({diff*100:+.4f} pp)")
-    print(f"  Within 95% CI?          = {status}")
+    print(f"  Within 3 SE?            = {status}")
     print(f"  E[chi(M-SCALE)]         = {mscale_mean:.6f}  (expect 0.0)")
     print()
 

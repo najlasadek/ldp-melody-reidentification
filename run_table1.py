@@ -13,7 +13,7 @@ epsilon in {ln3, ln7, ln12}, 30 trials, 95% Wilson score CIs.
 
 Usage
 -----
-  cd code/
+  # from the repository root
   python run_table1.py
 
 Requires data/melodies_europa.json (see README.md for download instructions).
